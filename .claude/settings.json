@@ -1,0 +1,22 @@
+{
+  "enabledMcpjsonServers": ["context7"],
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(uv add *)",
+      "Bash(uv pip install *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(jupyter nbconvert *)",
+      "Bash(ls *)",
+      "Bash(git status)",
+      "Bash(git diff *)"
+    ],
+    "deny": [
+      "Edit(./data/raw/**)",
+      "Bash(rm -rf *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Read(./.env)"
+    ]
+  }
+}
