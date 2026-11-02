@@ -4,5 +4,7 @@ __pycache__/
 .DS_Store
 .claude/settings.local.json
 data/raw/
+data/processed/
+qgis/
 *.qgz~
 *.qgs~
