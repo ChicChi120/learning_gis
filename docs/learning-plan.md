@@ -34,6 +34,27 @@
             B. 統計パネルで NUMPOINTS の合計が ④-1 の基準と一致するか
             C. NUMPOINTS が 0 の市区町村の件数を数え、地図で位置を見て理由を考える
             D. 境界をまたぐ変電所の面(9 件)のうち 1 件を選び、内部保証点が落ちた市区町村で数えられているかを確かめる
+    ★ 寄り道: GeoServer を試す(⑤ の前に実施。準備 約 15 分 + 試し作業 約 30 分)
+        目的: QGIS(手元で分析するデスクトップ GIS)と GeoServer(データを Web で配信するサーバー)の役割の違いを知る
+        学べる概念: OGC 標準(WMS = 地図を画像で配信、WFS = 地物をデータで配信)、ワークスペース・ストア・レイヤ、サーバー側の再投影
+        - [x] G-0 準備(11/12): openjdk 17.0.21 / geoserver-3.0.2-bin.zip を ~/Applications/geoserver に展開 / admin でログイン(サンプルの 5 ワークスペース・28 レイヤ)
+            A. Java 17 を入れる(GeoServer は Java 17 か 21 が必要。現在この Mac には Java が入っていない)。`brew install openjdk@17` か Adoptium の Temurin 17 のインストーラ
+            B. GeoServer 公式サイトから安定版(3.0 系)の Platform Independent Binary(zip)を取得し、プロジェクトの外(例: ~/Applications/geoserver)に展開する。リポジトリには入れない
+            C. `bin/startup.sh` で起動し、ブラウザで http://localhost:8080/geoserver を開き、admin / geoserver(初期パスワード)でログインできることを確かめる
+            - Docker を使う方法(`docker run -it -p 8080:8080 docker.osgeo.org/geoserver:3.0.x`)もあるが、Docker Desktop の導入が必要になるため今回は使わない
+        - [x] G-1 データを公開する(約 10 分)(11/13: aichi:n03_substation_count_6675、Native / Declared とも EPSG:6675)
+            A. ワークスペースを作る(名前: aichi。ワークスペース名は 10 文字以内・空白なしの制約があるため learning_gis は使えない)
+            B. ストアを追加する: 種類 = GeoPackage、データベース = data/processed/n03_substation_count_6675.gpkg(絶対パス)、Read only にチェック
+            C. レイヤ n03_substation_count_6675 を公開する。宣言された CRS が EPSG:6675 か確認し、境界ボックスを「データから計算」で埋めて保存する
+        - [x] G-2 配信された地図とデータを見る(約 10 分)(11/13: 豊橋市 NUMPOINTS 17 / EPSG:4326 の画像は縦に縮む)
+            A. Browse Layers(3.0 で Layer Preview から改名。上のメニューの GeoServer の中)の OpenLayers で地図を表示し、市区町村をクリックして NUMPOINTS が見えるか確かめる
+            B. WMS の GetMap の URL をブラウザで開き、返ってくるのが「画像(PNG)」であることを確かめる。srs を EPSG:4326 に変えても表示できる理由を考える
+            C. WFS の GetFeature(outputFormat=application/json)の URL を開き、返ってくるのが「属性付きの地物データ」であることを確かめる
+        - [x] G-3 QGIS から GeoServer に接続して比べる(約 10 分)(11/13: WFS で 69 件・NUMPOINTS 合計 228 が一致 / WMS は属性テーブル不可、地物情報表示は HTML)
+            A. QGIS で WMS レイヤと WFS レイヤとして同じレイヤを追加する
+            B. WMS レイヤと WFS レイヤで、地物情報表示・属性テーブルで何ができて何ができないかを比べる
+            C. WFS レイヤの地物数が 69 件、NUMPOINTS の合計が 228 で、④ の結果と一致するか確かめる
+        - 片付け: ターミナルで Ctrl+C(または `bin/shutdown.sh`)で停止する。GeoServer は localhost だけで使い、外部に公開しない(OSM 由来のデータは ODbL のため、公開するならクレジット表記などの条件を確かめる必要がある)
     ⑤ バッファ・カバー率	10km バッファ → 重なりを統合 → 市区町村と交差 → 面積比	バッファ、ディゾルブ、交差
     ⑥ 保存・記録	GPKG で data/processed/ に保存し、.qgz を保存する	再現性(Phase 2・3 の「正解」になる)
 - [ ] Phase 2: PyQGIS(GUI と同じ結果をスクリプトで再現)
